@@ -44,6 +44,18 @@ class CumulativePackerServiceImplTest {
     }
 
     @Test
+    void getOptimalItemsIndex_packCapacityEqualsToTheMaxCapacity_returnTheValidValue() throws APIException {
+        List<Item> items = new ArrayList<>();
+        items.add(getItem(1, 15.3f, 34));
+        Pack pack = new Pack(100, items);
+
+        List<Integer> optimalItemsIndex = packerService.getOptimalItemsIndexes(pack);
+
+        Assertions.assertEquals(1, optimalItemsIndex.size());
+        Assertions.assertEquals(1, optimalItemsIndex.get(0));
+    }
+
+    @Test
     void getOptimalItemsIndex_nullItems_throwsException() {
         String expectedMessage = "Pack item is empty.";
         Pack pack = new Pack(20, null);
@@ -97,6 +109,18 @@ class CumulativePackerServiceImplTest {
     }
 
     @Test
+    void getOptimalItemsIndex_itemWeightEqualsToTheMaxWeight_returnValidValue() throws APIException {
+        List<Item> items = new ArrayList<>();
+        items.add(getItem(1, 100f, 34));
+        Pack pack = new Pack(100, items);
+
+        List<Integer> optimalItemsIndex = packerService.getOptimalItemsIndexes(pack);
+
+        Assertions.assertEquals(1, optimalItemsIndex.size());
+        Assertions.assertEquals(1, optimalItemsIndex.get(0));
+    }
+
+    @Test
     void getOptimalItemsIndex_oneOfThemItemsExceededTheMaxCost_throwsException() {
         String expectedMessage = "Cost of item exceeded the max item cost size. Max cost size is";
         List<Item> items = new ArrayList<>();
@@ -108,6 +132,18 @@ class CumulativePackerServiceImplTest {
 
         Assertions.assertTrue(exception.getMessage().startsWith(expectedMessage));
         Assertions.assertNull(exception.getCause());
+    }
+
+    @Test
+    void getOptimalItemsIndex_itemsCostEqualsToTheMaxCost_throwsException() throws APIException {
+        List<Item> items = new ArrayList<>();
+        items.add(getItem(1, 15.3f, 100));
+        Pack pack = new Pack(30, items);
+
+        List<Integer> optimalItemsIndex = packerService.getOptimalItemsIndexes(pack);
+
+        Assertions.assertEquals(1, optimalItemsIndex.size());
+        Assertions.assertEquals(1, optimalItemsIndex.get(0));
     }
 
     @Test

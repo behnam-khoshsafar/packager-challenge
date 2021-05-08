@@ -38,7 +38,7 @@ class ParserServiceImpl implements ParserService {
         checkFileExist(getFilePath(filePath));
     }
 
-    private Path getFilePath(String filePath) throws APIException {
+    private Path getFilePath(String filePath) {
         return Paths.get(filePath);
     }
 

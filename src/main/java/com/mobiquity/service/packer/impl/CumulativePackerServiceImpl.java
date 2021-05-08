@@ -105,7 +105,7 @@ class CumulativePackerServiceImpl implements PackerService {
     /**
      * First remove items that is not in range of pack max capacity.
      * then sorts them based on their cost and weight.
-     *CumulativePackerServiceImpl.java
+     *
      * @return list of item that have valid range of weight and sorted using by cost and weight.
      */
     private List<Integer> getOptimalItemsIndexes(Pack pack, List<Item> sortedItemsInPackWeightRange) {
@@ -113,7 +113,7 @@ class CumulativePackerServiceImpl implements PackerService {
         float optimalTotalItemWeight = 0f;
         for (Item item : sortedItemsInPackWeightRange) {
             float totalWeight = Float.sum(optimalTotalItemWeight, item.getWeight());
-            if (totalWeight < pack.getMaxCapacity()) {
+            if (totalWeight <= pack.getMaxCapacity()) {
                 optimalTotalItemWeight = totalWeight;
                 optimalIndexes.add(item.getIndex());
             }
