@@ -217,7 +217,7 @@ class GSPackerServiceImplTest {
     }
 
     @Test
-    void getOptimalItemsIndex_itemsWithSamePrice_returnsTheLowestWeightzxx() throws APIException {
+    void getOptimalItemsIndex_itemsWithSamePriceAndSameWeights_returnsTheCorrectResult() throws APIException {
         List<Item> items = new ArrayList<>();
         items.add(getItem(1, 80.00f, 80));
         items.add(getItem(2, 30.00f, 30));
@@ -229,6 +229,9 @@ class GSPackerServiceImplTest {
         List<Integer> optimalItemsIndex = packerService.getOptimalItemsIndexes(pack);
 
         Assertions.assertEquals(3, optimalItemsIndex.size());
+        Assertions.assertEquals(2, optimalItemsIndex.get(0));
+        Assertions.assertEquals(3, optimalItemsIndex.get(1));
+        Assertions.assertEquals(4, optimalItemsIndex.get(2));
     }
 
     private Item getItem(int index, float weight, int cost) {
