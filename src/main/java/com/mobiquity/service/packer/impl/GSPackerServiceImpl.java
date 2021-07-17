@@ -85,18 +85,19 @@ class GSPackerServiceImpl implements PackerService {
             return Collections.emptyList();
 
         // If capacity of the nth item is more than the capacity, then this item cannot be included in the optimal solution
-        Item item = items[length - 1];
+        int currentIndex = length - 1;
+        Item item = items[currentIndex];
         if (item.getWeight() > capacity) {
-            return getOptimalItemsRecursive(items, capacity, length - 1);
+            return getOptimalItemsRecursive(items, capacity, currentIndex);
         }
 
         // Find optimal items consider that the n(th) item is in the selected items
         List<Item> including = new ArrayList<>();
         Collections.addAll(including, item);
-        including.addAll(getOptimalItemsRecursive(items, capacity - item.getWeight(), length - 1));
+        including.addAll(getOptimalItemsRecursive(items, capacity - item.getWeight(), currentIndex));
 
         // Find optimal items consider that the n(th) item is not in the selected items
-        List<Item> notIncluding = getOptimalItemsRecursive(items, capacity, length - 1);
+        List<Item> notIncluding = getOptimalItemsRecursive(items, capacity, currentIndex);
 
         return getOptimalItems(including, notIncluding);
 
