@@ -11,9 +11,9 @@ public class PackerServiceFactory {
 
     public static PackerService getInstance() {
         if (packerService == null) {
-            synchronized (CumulativePackerServiceImpl.class) {
+            synchronized (GSPackerServiceImpl.class) {
                 if (packerService == null)
-                    packerService = new CumulativePackerServiceImpl();
+                    packerService = new GSPackerServiceImpl();
             }
         }
         return packerService;

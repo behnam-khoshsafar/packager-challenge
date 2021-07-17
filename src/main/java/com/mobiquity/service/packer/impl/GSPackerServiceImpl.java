@@ -6,21 +6,21 @@ import com.mobiquity.model.Pack;
 import com.mobiquity.service.packer.PackerService;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Concrete class to solve package challenge using cumulative approach to reach maximum cost and lowest weight in pack.
+ * Concrete class to solve package challenge using greedy algorithm to reach maximum cost and lowest weight in pack.
  */
-class CumulativePackerServiceImpl implements PackerService {
+class GSPackerServiceImpl implements PackerService {
 
     public static final int ITEM_MAX_WEIGHT = 100;
     public static final int ITEM_MAX_COST = 100;
     public static final int PACK_MAX_CAPACITY = 100;
     public static final int PACK_MAX_ITEMS_SIZE = 15;
 
-    CumulativePackerServiceImpl() {
+    GSPackerServiceImpl() {
     }
 
     @Override
@@ -73,52 +73,55 @@ class CumulativePackerServiceImpl implements PackerService {
      * @return list of indexes of optimal items in pack.
      */
     private List<Integer> getOptimalItemsIndexesSorted(Pack pack) {
-        List<Item> sortedItemsInPackWeightRange = getItemsInPackWeightRangeSorted(pack);
-        List<Integer> optimalIndexes = getOptimalItemsIndexes(pack, sortedItemsInPackWeightRange);
-        return sortItemsIndexes(optimalIndexes);
+        Item[] items = new Item[pack.getItems().size()];
+        List<Item> optimalIndexes = getOptimalItemsRecursive(pack.getItems().toArray(items),
+                pack.getMaxCapacity(),
+                pack.getItems().size());
+        return sortItemsIndexes(optimalIndexes.stream().map(Item::getIndex).collect(Collectors.toList()));
     }
 
-    /**
-     * First remove items that is not in range of pack max capacity.
-     * then sorts them based on their cost and weight.
-     *
-     * @return list of item that have valid range of weight and sorted using by cost and weight.
-     */
-    private List<Item> getItemsInPackWeightRangeSorted(Pack pack) {
-        return pack.getItems().stream()
-                .filter(item -> item.getWeight() <= pack.getMaxCapacity())
-                .sorted(getComparator())
-                .collect(Collectors.toList());
-    }
+    private List<Item> getOptimalItemsRecursive(Item[] items, double capacity, int length) {
+        if (length == 0 || capacity == 0)
+            return Collections.emptyList();
 
-    /**
-     * Generate a comparator that we can use it to compares items based on their cost and sorts them descending.
-     * if costs are equal then compare them using weight and sort these items ascending.
-     *
-     * @return comparator.
-     */
-    private Comparator<Item> getComparator() {
-        return Comparator.comparing(Item::getCost).reversed()
-                .thenComparing(Item::getWeight);
-    }
-
-    /**
-     * First remove items that is not in range of pack max capacity.
-     * then sorts them based on their cost and weight.
-     *
-     * @return list of item that have valid range of weight and sorted using by cost and weight.
-     */
-    private List<Integer> getOptimalItemsIndexes(Pack pack, List<Item> sortedItemsInPackWeightRange) {
-        List<Integer> optimalIndexes = new ArrayList<>();
-        float optimalTotalItemWeight = 0f;
-        for (Item item : sortedItemsInPackWeightRange) {
-            float totalWeight = Float.sum(optimalTotalItemWeight, item.getWeight());
-            if (totalWeight <= pack.getMaxCapacity()) {
-                optimalTotalItemWeight = totalWeight;
-                optimalIndexes.add(item.getIndex());
-            }
+        // If capacity of the nth item is more than the capacity, then this item cannot be included in the optimal solution
+        Item item = items[length - 1];
+        if (item.getWeight() > capacity) {
+            return getOptimalItemsRecursive(items, capacity, length - 1);
         }
-        return optimalIndexes;
+
+        // Find optimal items consider that the n(th) item is in the selected items
+        List<Item> including = new ArrayList<>();
+        Collections.addAll(including, item);
+        including.addAll(getOptimalItemsRecursive(items, capacity - item.getWeight(), length - 1));
+
+        // Find optimal items consider that the n(th) item is not in the selected items
+        List<Item> notIncluding = getOptimalItemsRecursive(items, capacity, length - 1);
+
+        return getOptimalItems(including, notIncluding);
+
+    }
+
+    private List<Item> getOptimalItems(List<Item> including, List<Item> notIncluding) {
+        if (isPriceEqual(including, notIncluding))
+            return getItemsWithLowerTotalWeight(including, notIncluding);
+        return getItemsWithHighestTotalCost(including, notIncluding);
+    }
+
+    private boolean isPriceEqual(List<Item> including, List<Item> notIncluding) {
+        return including.stream().mapToDouble(Item::getCost).sum() == notIncluding.stream().mapToDouble(Item::getCost).sum();
+    }
+
+    private List<Item> getItemsWithLowerTotalWeight(List<Item> including, List<Item> notIncluding) {
+        if (including.stream().mapToDouble(Item::getWeight).sum() < notIncluding.stream().mapToDouble(Item::getWeight).sum())
+            return including;
+        return notIncluding;
+    }
+
+    private List<Item> getItemsWithHighestTotalCost(List<Item> including, List<Item> notIncluding) {
+        if (including.stream().mapToDouble(Item::getCost).sum() > notIncluding.stream().mapToDouble(Item::getCost).sum())
+            return including;
+        return notIncluding;
     }
 
     /**

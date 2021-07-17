@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-class CumulativePackerServiceImplTest {
+class GSPackerServiceImplTest {
 
     private PackerService packerService;
 
@@ -214,6 +214,21 @@ class CumulativePackerServiceImplTest {
         Assertions.assertEquals(2, optimalItemsIndex.size());
         Assertions.assertEquals(8, optimalItemsIndex.get(0));
         Assertions.assertEquals(9, optimalItemsIndex.get(1));
+    }
+
+    @Test
+    void getOptimalItemsIndex_itemsWithSamePrice_returnsTheLowestWeightzxx() throws APIException {
+        List<Item> items = new ArrayList<>();
+        items.add(getItem(1, 80.00f, 80));
+        items.add(getItem(2, 30.00f, 30));
+        items.add(getItem(3, 30.00f, 30));
+        items.add(getItem(4, 30.00f, 30));
+        items.add(getItem(5, 33.80f, 40));
+        Pack pack = new Pack(90, items);
+
+        List<Integer> optimalItemsIndex = packerService.getOptimalItemsIndexes(pack);
+
+        Assertions.assertEquals(3, optimalItemsIndex.size());
     }
 
     private Item getItem(int index, float weight, int cost) {
